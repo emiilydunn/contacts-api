@@ -70,8 +70,8 @@ router.post('/create', upload.single('image'), async (req, res) => {
   const filename = req.file ? req.file.filename : null;
   const { firstName, lastName, title, email, phone } = req.body;
 
-  if(!firstName || !lastName || !email || !phone) {
-    return res.status(400).json({ message: 'Required fields must have a value.'});
+  if (!firstName || !lastName || !email || !phone) {
+    return res.status(400).json({ message: 'Required fields must have a value.' });
   }
   //Error handling - fix this later
   //To-do: Delete uploaded file
@@ -109,13 +109,28 @@ router.post('/create', upload.single('image'), async (req, res) => {
 // .../api/contacts/update
 router.put('/update/:id', upload.single('image'), (req, res) => {
   const id = req.params.id;
-  res.send('Update Contact')
+
+  //To-do:
+  //Capture the remaining inputs
+  //Validate inputs
+  //Get contact by ID, return 404 if not found
+  //If image file is uploaded, get the file name to save in db and delete the old image file. set the file name to new file name
+  //If image file is not uploaded, when updating record with prisma, set the file name to the original file name
+  //Update record in the database (ensuring file name is new or old name)
+
+  res.send('Update Contact ' + id);
 });
 
 //Delete contact by ID
 // .../api/contacts/delete
 router.delete('/delete/:id', (req, res) => {
-  res.send('Delete Contact')
+  const id = req.params.id;
+  //To do:
+  //Validate input
+  //Get contact by ID
+  //Delete the contact in the db
+  //Remove the image
+  res.send('Delete Contact by ID ' + id);
 
 });
 
