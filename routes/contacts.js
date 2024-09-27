@@ -2,14 +2,12 @@ import express from 'express';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 
-
 const router = express.Router();
 
 //Prisma setup
 const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
-
 
 //Multer setup
 const storage = multer.diskStorage({
@@ -107,24 +105,42 @@ router.post('/create', upload.single('image'), async (req, res) => {
 
 //Update contact by ID (with Multer)
 // .../api/contacts/update
-router.put('/update/:id', upload.single('image'), (req, res) => {
+router.put('/update/:id', upload.single('image'), async (req, res) => {
   const id = req.params.id;
 
-  //To-do:
+    //To-do:
   //Capture the remaining inputs
   //Validate inputs
   //Get contact by ID, return 404 if not found
   //If image file is uploaded, get the file name to save in db and delete the old image file. set the file name to new file name
   //If image file is not uploaded, when updating record with prisma, set the file name to the original file name
   //Update record in the database (ensuring file name is new or old name)
+  const contact = await prisma.contact.update({
+    where: {
+      id: parseInt(id),
+    },
+    data: {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      phone: phone,
+      title: title,
+      filename: filename,
+    },
 
-  res.send('Update Contact ' + id);
+  })
+  res.json(contact);
 });
 
 //Delete contact by ID
 // .../api/contacts/delete
-router.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
   const id = req.params.id;
+  const contact = await prisma.contact.delete({
+    where: {
+      id: parseInt(id),
+    },
+  })
   //To do:
   //Validate input
   //Get contact by ID
