@@ -101,21 +101,44 @@ router.post('/create', upload.single('image'), async (req, res) => {
   res.json(contact);
 });
 
-//Look up Prisma update and delete in documentation
 
 //Update contact by ID (with Multer)
-// .../api/contacts/update
+// .../api/contacts/update/:id
 router.put('/update/:id', upload.single('image'), async (req, res) => {
   const id = req.params.id;
 
-    //To-do:
+  //Validate if ID is a number
+  if (isNaN(parseInt(id))) {
+    res.status(400).json({ message: 'ID not found. Please try again.' });
+    return;
+  }
+
+  //Check if ID exists
+  const contact = await prisma.contact.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+  });
+
+  //If statement to output valid/invalid ID
+  if (!contact) {
+    res.status(400).json({ message: "Contact not found. Please try again." })
+    return;
+  }
+
+  //If contact is found, proceed with update
+
+  //To-do:
   //Capture the remaining inputs
   //Validate inputs
   //Get contact by ID, return 404 if not found
   //If image file is uploaded, get the file name to save in db and delete the old image file. set the file name to new file name
   //If image file is not uploaded, when updating record with prisma, set the file name to the original file name
   //Update record in the database (ensuring file name is new or old name)
-  const contact = await prisma.contact.update({
+  const { firstName, lastName, title, email, phone } = req.body;
+  const filename = req.file ? req.file.filename : contact.filename;
+
+  await prisma.contact.update({
     where: {
       id: parseInt(id),
     },
@@ -128,29 +151,57 @@ router.put('/update/:id', upload.single('image'), async (req, res) => {
       filename: filename,
     },
 
-  })
-  res.json(contact);
+  });
+
+  //If update is successful, confirm it to the user
+  const updatedContact = await prisma.contact.findUnique({
+    where: {
+      id: parseInt(id),
+    },
+  });
+  res.status(200).json({ message: `Contact ${id} successfully updated`, updatedContact });
+
 });
 
 //Delete contact by ID
 // .../api/contacts/delete
+
+//TO-DO
+//Remove the image in vscode
+//ISSUE: The image deletes in datagrip, but not in VScode. I also have to fix error handling.
+
 router.delete('/delete/:id', async (req, res) => {
   const id = req.params.id;
-  const contact = await prisma.contact.delete({
+
+  //Validate if id is a number
+  if (isNaN(parseInt(id))) {
+    res.status(400).json({ message: 'ID not found. Please try again.' });
+    return;
+  }
+
+  //Check if ID exists
+  const contact = await prisma.contact.findUnique({
     where: {
       id: parseInt(id),
     },
-  })
-  //To do:
-  //Validate input
-  //Get contact by ID
-  //Delete the contact in the db
-  //Remove the image
-  res.send('Delete Contact by ID ' + id);
+  });
+
+  //If statement to output valid/invalid ID
+  if (!contact) {
+    res.status(400).json({ message: "Contact not found. Please try again." })
+    return;
+  }
+
+  //If contact is found, proceed with deletion
+  await prisma.contact.delete({
+    where: {
+      id: parseInt(id),
+    },
+  });
+
+  // If deletion is successful, confirm it to the user
+  res.status(200).json({ message: `Contact with ID ${id} was successfully deleted.` });
 
 });
-
-
-
 
 export default router;
